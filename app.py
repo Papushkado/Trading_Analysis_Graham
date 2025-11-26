@@ -8,12 +8,6 @@ import numpy as np
 import yfinance as yf
 
 # -------------------------
-# This application is the property of Stephen Cohen / Papushkado ; cannot be used for sale. 
-# If you want to create something, we can surely build it together. 
-# -------------------------
-
-
-# -------------------------
 # TICKER—NAME MAPPING
 # -------------------------
 TICKERS_DICT = {
@@ -120,7 +114,7 @@ _This tool screens SBF120 stocks based on the legendary **Benjamin Graham** valu
 """)
 
 # --------- GRAHAM CRITERIA & HELP ----------
-with st.expander("Selection criteria (hover for help)", expanded=True):
+with st.expander("🔧 Selection criteria (hover for help)", expanded=True):
     col1, col2, col3 = st.columns(3)
     with col1:
         per_max = st.slider(
@@ -155,7 +149,7 @@ with st.expander("Selection criteria (hover for help)", expanded=True):
 selected_names = st.multiselect(
     "Select the stocks to analyze",
     options=TICKER_CHOICES,
-    default=TICKER_CHOICES[:12],
+    default=TICKER_CHOICES,  # All companies pre-selected
     help="You will see the stock name and its ticker."
 )
 selected_tickers = [c.split("(")[-1].replace(")", "").strip() for c in selected_names]
@@ -167,10 +161,22 @@ if st.button("Run analysis!"):
             d = get_stock_data(t)
             data.append(d)
     df = pd.DataFrame(data)
+
     st.success(f"{df.shape[0]} stocks analyzed.")
 
+    # --- Choose sort column and order before table ---
+    graham_columns = [
+        'Name', 'Ticker', 'Price', 'P/E', 'P/B', 'Debt/Equity',
+        'Dividend Yield (%)', 'Market Cap (Bn €)', 'EPS',
+        'Dividend/year', 'Net Profit >0'
+    ]
+
+    sort_col = st.selectbox("Sort by:", graham_columns, index=0)
+    sort_asc = st.radio("Order:", ["Ascending", "Descending"], index=1, horizontal=True)
+    df = df.sort_values(by=sort_col, ascending=(sort_asc == "Ascending"))
+
     st.markdown("#### Summary table of collected data:")
-    st.dataframe(df, use_container_width=True, hide_index=True)
+    st.dataframe(df[graham_columns], use_container_width=True, hide_index=True)
 
     # ---- FILTERING CRITERIA ----
     crit = (
@@ -184,18 +190,19 @@ if st.button("Run analysis!"):
     filtres_df = df[crit]
 
     st.markdown("### Stocks that meet your Graham criteria:")
-    st.dataframe(filtres_df, use_container_width=True, hide_index=True)
+    if not filtres_df.empty:
+        st.dataframe(filtres_df[graham_columns], use_container_width=True, hide_index=True)
+    else:
+        st.info("No stock meets all the chosen criteria.")
 
-    # --- Export CSV
+    # --- CSV Export
     if not filtres_df.empty:
         st.download_button(
             label="Download selection (CSV)",
-            data=filtres_df.to_csv(index=False).encode('utf-8'),
+            data=filtres_df[graham_columns].to_csv(index=False).encode('utf-8'),
             file_name="graham_stocks_sbf120.csv",
             mime="text/csv"
         )
-    else:
-        st.info("No stock meets all the chosen criteria.")
 
     # --- Visualization
     if not filtres_df.empty:
