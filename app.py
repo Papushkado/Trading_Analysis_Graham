@@ -124,6 +124,7 @@ with st.expander("ℹ️ How this app works / About Graham", expanded=False):
 # -------------------------
 cols = st.columns(5)
 cols[0].metric("US 10Y Yield", f"{get_rate_yield('^TNX')}%")
+## Attention les tickers de France et Allemagne n'existe pas sur yfinance je cherche un moyen de trouver
 cols[1].metric("FR 10Y Yield", f"{get_rate_yield('^FR10Y')}%")
 cols[2].metric("DE 10Y Yield", f"{get_rate_yield('^DE10Y')}%")
 cols[3].metric("BTC/USD", f"${get_asset_price('BTC-USD')}")
