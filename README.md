@@ -39,7 +39,7 @@ A **Streamlit** application for screening French stocks in the **SBF120** index 
 
 1. Clone this repository.
 2. Install requirements:  
-   `pip install streamlit pandas numpy yfinance certifi`
+   `pip install -r requirements.txt
 3. Run the app:  
    `streamlit run app.py`
 4. Open your browser at the given local address.
